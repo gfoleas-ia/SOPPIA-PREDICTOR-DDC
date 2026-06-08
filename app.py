@@ -9,13 +9,8 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    confusion_matrix
-)
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+
 
 # ============================================================
 # CONFIGURACIÓN GENERAL
@@ -23,7 +18,6 @@ from sklearn.metrics import (
 
 DATASET = "dataset_sintetico_ddc.csv"
 ICONO = "assets/soppia_sofia_icon.png"
-DICCIONARIO = "diccionario_variables_ddc.txt"
 OBJETIVO = "ddc_diagnostico"
 
 try:
@@ -37,8 +31,9 @@ st.set_page_config(
     layout="wide"
 )
 
+
 # ============================================================
-# ESTILO VISUAL
+# ESTILO VISUAL SIMPLE
 # ============================================================
 
 st.markdown(
@@ -126,20 +121,22 @@ st.markdown(
 
     .footer {
         margin-top: 35px;
-        padding: 16px;
+        padding: 18px;
         background-color: #E8F2FF;
         border-radius: 10px;
         text-align: center;
         color: #003B7A;
         font-weight: 600;
+        line-height: 1.5;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
+
 # ============================================================
-# FUNCIONES DE DATOS Y MODELO
+# FUNCIONES
 # ============================================================
 
 @st.cache_data
@@ -156,9 +153,9 @@ def cargar_datos():
                 "sí": "Si",
                 "SI": "Si",
                 "si": "Si",
-                "No ": "No",
                 "NO": "No",
-                "no": "No"
+                "no": "No",
+                "No ": "No"
             })
         )
 
@@ -169,12 +166,11 @@ def cargar_datos():
 def entrenar_modelo(df):
     datos = df.copy()
 
-    columnas_excluir = [
-        "id_paciente",
-        "riesgo_teorico_ddc"
-    ]
-
-    datos = datos.drop(columns=columnas_excluir, errors="ignore")
+    # No entrenar con identificadores ni variables derivadas del riesgo
+    datos = datos.drop(
+        columns=["id_paciente", "riesgo_teorico_ddc"],
+        errors="ignore"
+    )
 
     X = datos.drop(columns=[OBJETIVO])
     y = datos[OBJETIVO]
@@ -250,22 +246,11 @@ def obtener_probabilidad_ddc(modelo, nuevo_paciente):
 
 def clasificar_riesgo(probabilidad):
     if probabilidad >= 0.70:
-        return (
-            "Riesgo alto",
-            "Evaluación prioritaria por Ortopedia Pediátrica."
-        )
-
+        return "Riesgo alto", "Evaluación prioritaria por Ortopedia Pediátrica."
     elif probabilidad >= 0.40:
-        return (
-            "Riesgo intermedio",
-            "Correlacionar con examen físico y estudio de imagen."
-        )
-
+        return "Riesgo intermedio", "Correlacionar con examen físico y estudio de imagen."
     else:
-        return (
-            "Riesgo bajo",
-            "Mantener vigilancia clínica según edad, antecedentes y signos físicos."
-        )
+        return "Riesgo bajo", "Mantener vigilancia clínica según edad, antecedentes y signos físicos."
 
 
 def card(titulo, valor):
@@ -300,7 +285,7 @@ def mostrar_bibliografia():
 
 
 # ============================================================
-# CARGAR DATASET Y ENTRENAR
+# CARGAR DATASET Y ENTRENAR MODELO
 # ============================================================
 
 try:
@@ -315,8 +300,9 @@ if OBJETIVO not in df.columns:
 
 modelo, X, metricas, matriz = entrenar_modelo(df)
 
+
 # ============================================================
-# MENÚ LATERAL
+# BARRA LATERAL
 # ============================================================
 
 try:
@@ -327,6 +313,19 @@ except Exception:
 st.sidebar.title("SOPP+IA Sofía")
 st.sidebar.write("Predictor educativo de DDC")
 
+st.sidebar.markdown("---")
+st.sidebar.markdown(
+    """
+    **Desarrollado por:**  
+    Dr. Geovanny Oleas-Santillán  
+
+    Ortopedista Pediatra  
+    Quito, Ecuador
+    """
+)
+
+st.sidebar.markdown("---")
+
 menu = st.sidebar.radio(
     "Menú",
     [
@@ -334,11 +333,11 @@ menu = st.sidebar.radio(
         "Exploración de datos",
         "Modelo predictivo",
         "Predicción individual",
-        "Diccionario de variables",
         "Bibliografía",
         "Interpretación clínica"
     ]
 )
+
 
 # ============================================================
 # INICIO
@@ -374,6 +373,17 @@ if menu == "Inicio":
             <div class="alerta">
             Uso académico y educativo. Este sistema no reemplaza el criterio médico,
             el examen físico ni los estudios de imagen.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            """
+            <div class="bloque-azul">
+            <b>Proyecto desarrollado por:</b><br>
+            Dr. Geovanny Oleas-Santillán<br>
+            Ortopedista Pediatra · Quito, Ecuador
             </div>
             """,
             unsafe_allow_html=True
@@ -439,6 +449,7 @@ if menu == "Inicio":
             """,
             unsafe_allow_html=True
         )
+
 
 # ============================================================
 # EXPLORACIÓN DE DATOS
@@ -511,6 +522,7 @@ elif menu == "Exploración de datos":
             unsafe_allow_html=True
         )
 
+
 # ============================================================
 # MODELO PREDICTIVO
 # ============================================================
@@ -555,6 +567,7 @@ elif menu == "Modelo predictivo":
     st.warning(
         "Las métricas corresponden a un dataset sintético. No deben interpretarse como validación clínica externa."
     )
+
 
 # ============================================================
 # PREDICCIÓN INDIVIDUAL
@@ -645,57 +658,6 @@ elif menu == "Predicción individual":
         with st.expander("Ver datos ingresados"):
             st.dataframe(nuevo_paciente, use_container_width=True)
 
-# ============================================================
-# DICCIONARIO DE VARIABLES
-# ============================================================
-
-elif menu == "Diccionario de variables":
-
-    st.header("Diccionario de variables")
-
-    st.markdown(
-        """
-        <div class="bloque-azul">
-        Esta sección hace público el diccionario de variables utilizado en el dataset.
-        Su objetivo es facilitar la lectura clínica, académica y metodológica del predictor.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    try:
-        with open(DICCIONARIO, "r", encoding="utf-8") as archivo:
-            texto_diccionario = archivo.read()
-
-        lineas = [linea.strip() for linea in texto_diccionario.splitlines() if linea.strip()]
-
-        if len(lineas) == 0:
-            st.warning("El archivo diccionario_variables_ddc.txt está vacío.")
-        else:
-            for linea in lineas:
-                if ":" in linea:
-                    variable, descripcion = linea.split(":", 1)
-                    st.markdown(
-                        f"""
-                        <div class="bloque">
-                        <b>{variable.strip()}</b><br>
-                        {descripcion.strip()}
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-                else:
-                    st.markdown(
-                        f"""
-                        <div class="bloque">
-                        {linea}
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-    except FileNotFoundError:
-        st.warning("No se encontró el archivo diccionario_variables_ddc.txt.")
 
 # ============================================================
 # BIBLIOGRAFÍA
@@ -716,6 +678,7 @@ elif menu == "Bibliografía":
     )
 
     mostrar_bibliografia()
+
 
 # ============================================================
 # INTERPRETACIÓN CLÍNICA
@@ -781,6 +744,7 @@ elif menu == "Interpretación clínica":
         except Exception:
             st.info("SOPP+IA Sofía")
 
+
 # ============================================================
 # PIE DE PÁGINA
 # ============================================================
@@ -788,7 +752,12 @@ elif menu == "Interpretación clínica":
 st.markdown(
     """
     <div class="footer">
-    SOPP+IA Sofía · Inteligencia humana + inteligencia artificial para servir mejor a niños y familias
+        <b>SOPP+IA Sofía</b><br>
+        Inteligencia humana + inteligencia artificial para servir mejor a niños y familias<br><br>
+        <span style="font-size:15px;">
+        Proyecto desarrollado por <b>Dr. Geovanny Oleas-Santillán</b><br>
+        Ortopedista Pediatra · Quito, Ecuador
+        </span>
     </div>
     """,
     unsafe_allow_html=True

@@ -7,7 +7,6 @@ Aplicación académica desarrollada en Python y Streamlit para explorar factores
 
 - `app.py`: aplicación principal en Streamlit.
 - `dataset_sintetico_ddc.csv`: dataset sintético usado para entrenamiento.
-- `diccionario_variables_ddc.txt`: descripción pública de las variables.
 - `requirements.txt`: librerías necesarias.
 - `assets/soppia_sofia_icon.png`: ícono visual de SOPP+IA Sofía.
 
@@ -18,4 +17,4 @@ Este proyecto es académico y educativo. No reemplaza el criterio médico, el ex
 ## Autor
 
 Dr. Geovanny F. Oleas-Santillán  
-Ortopedia Pediátrica · Inteligencia Artificial aplicada a la medicina
+Ortopedista Pediatra · Quito, Ecuador
