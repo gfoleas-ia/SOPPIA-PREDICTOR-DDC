@@ -12,132 +12,104 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 
-# ============================================================
-# CONFIGURACIÓN GENERAL
-# ============================================================
-
-DATASET = "dataset_sintetico_ddc.csv"
+DATASET = "dataset_sintetico_ddc_graf_auditado_v2.csv"
+DICCIONARIO = "diccionario_variables_ddc_graf_auditado_v2.txt"
 ICONO = "assets/soppia_sofia_icon.png"
 OBJETIVO = "ddc_diagnostico"
 
 try:
     icono_sofia = Image.open(ICONO)
 except Exception:
-    icono_sofia = "🤖"
+    icono_sofia = "🦴"
 
 st.set_page_config(
-    page_title="SOPP+IA Sofía | Predictor DDC",
+    page_title="SOPP+IA Sofía | Predictor educativo DDC",
     page_icon=icono_sofia,
     layout="wide"
 )
 
+st.markdown("""
+<style>
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0057B8, #003B7A);
+}
+[data-testid="stSidebar"] * {
+    color: white;
+}
+.titulo {
+    color: #003B7A;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+.subtitulo {
+    color: #334155;
+    font-size: 18px;
+    line-height: 1.5;
+}
+.alerta {
+    background-color: #E8F2FF;
+    color: #003B7A;
+    padding: 16px;
+    border-radius: 10px;
+    border-left: 7px solid #F26A21;
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+.card {
+    background-color: white;
+    border: 1px solid #D6E4F5;
+    border-radius: 15px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0px 4px 12px rgba(0, 59, 122, 0.08);
+}
+.numero {
+    color: #003B7A;
+    font-size: 30px;
+    font-weight: 800;
+}
+.texto {
+    color: #475569;
+    font-size: 15px;
+}
+.bloque {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 15px;
+}
+.bloque-azul {
+    background-color: #F0F7FF;
+    border: 1px solid #CFE3FF;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 15px;
+}
+.bibliografia {
+    background-color: #FFFFFF;
+    border-left: 5px solid #003B7A;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 15px;
+    color: #334155;
+}
+.footer {
+    margin-top: 35px;
+    padding: 18px;
+    background-color: #E8F2FF;
+    border-radius: 10px;
+    text-align: center;
+    color: #003B7A;
+    font-weight: 600;
+    line-height: 1.5;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# ============================================================
-# ESTILO VISUAL SIMPLE
-# ============================================================
-
-st.markdown(
-    """
-    <style>
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #004A98, #003B7A);
-    }
-
-    [data-testid="stSidebar"] * {
-        color: white;
-    }
-
-    .titulo {
-        color: #003B7A;
-        font-size: 34px;
-        font-weight: 800;
-        line-height: 1.2;
-        margin-bottom: 10px;
-    }
-
-    .subtitulo {
-        color: #334155;
-        font-size: 18px;
-        line-height: 1.5;
-    }
-
-    .alerta {
-        background-color: #E8F2FF;
-        color: #003B7A;
-        padding: 15px;
-        border-radius: 10px;
-        border-left: 7px solid #F26A21;
-        font-weight: 600;
-        margin-top: 15px;
-        margin-bottom: 20px;
-    }
-
-    .card {
-        background-color: white;
-        border: 1px solid #D6E4F5;
-        border-radius: 15px;
-        padding: 18px;
-        text-align: center;
-        box-shadow: 0px 4px 12px rgba(0, 59, 122, 0.08);
-        min-height: 95px;
-    }
-
-    .numero {
-        color: #003B7A;
-        font-size: 28px;
-        font-weight: 800;
-    }
-
-    .texto {
-        color: #475569;
-        font-size: 15px;
-    }
-
-    .bloque {
-        background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 14px;
-        padding: 18px;
-        margin-bottom: 15px;
-    }
-
-    .bloque-azul {
-        background-color: #F0F7FF;
-        border: 1px solid #CFE3FF;
-        border-radius: 14px;
-        padding: 18px;
-        margin-bottom: 15px;
-    }
-
-    .bibliografia {
-        background-color: #FFFFFF;
-        border-left: 5px solid #003B7A;
-        padding: 14px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        font-size: 15px;
-        color: #334155;
-    }
-
-    .footer {
-        margin-top: 35px;
-        padding: 18px;
-        background-color: #E8F2FF;
-        border-radius: 10px;
-        text-align: center;
-        color: #003B7A;
-        font-weight: 600;
-        line-height: 1.5;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-
-# ============================================================
-# FUNCIONES
-# ============================================================
 
 @st.cache_data
 def cargar_datos():
@@ -166,11 +138,13 @@ def cargar_datos():
 def entrenar_modelo(df):
     datos = df.copy()
 
-    # No entrenar con identificadores ni variables derivadas del riesgo
-    datos = datos.drop(
-        columns=["id_paciente", "riesgo_teorico_ddc"],
-        errors="ignore"
-    )
+    columnas_no_modelo = [
+        "id_paciente",
+        "riesgo_teorico_ddc",
+        "resultado_final_simulado"
+    ]
+
+    datos = datos.drop(columns=columnas_no_modelo, errors="ignore")
 
     X = datos.drop(columns=[OBJETIVO])
     y = datos[OBJETIVO]
@@ -213,7 +187,6 @@ def entrenar_modelo(df):
     )
 
     modelo.fit(X_train, y_train)
-
     y_pred = modelo.predict(X_test)
 
     metricas = {
@@ -223,11 +196,7 @@ def entrenar_modelo(df):
         "F1-score": f1_score(y_test, y_pred, pos_label="Si", zero_division=0)
     }
 
-    matriz = confusion_matrix(
-        y_test,
-        y_pred,
-        labels=["No", "Si"]
-    )
+    matriz = confusion_matrix(y_test, y_pred, labels=["No", "Si"])
 
     return modelo, X, metricas, matriz
 
@@ -246,11 +215,11 @@ def obtener_probabilidad_ddc(modelo, nuevo_paciente):
 
 def clasificar_riesgo(probabilidad):
     if probabilidad >= 0.70:
-        return "Riesgo alto", "Evaluación prioritaria por Ortopedia Pediátrica."
+        return "Riesgo alto", "Se recomienda evaluación prioritaria por médico especialista en Ortopedia Pediátrica."
     elif probabilidad >= 0.40:
-        return "Riesgo intermedio", "Correlacionar con examen físico y estudio de imagen."
+        return "Riesgo intermedio", "Se recomienda valoración clínica, examen físico y estudios de imagen según criterio del ortopedista pediatra."
     else:
-        return "Riesgo bajo", "Mantener vigilancia clínica según edad, antecedentes y signos físicos."
+        return "Riesgo bajo", "Mantener vigilancia. La evaluación médica sigue siendo necesaria si existen signos clínicos o antecedentes de riesgo."
 
 
 def card(titulo, valor):
@@ -270,7 +239,7 @@ def mostrar_bibliografia():
         "Agostiniani, R., et al. (2020). Recommendations for early diagnosis of Developmental Dysplasia of the Hip (DDH): Working group intersociety consensus document. Italian Journal of Pediatrics, 46(150).",
         "Aarvold, A., et al. (2023). The management of developmental dysplasia of the hip in children aged under three months: A consensus study from the British Society for Children’s Orthopaedic Surgery. Bone & Joint Journal, 105-B(2), 209–214.",
         "Kuitunen, I., et al. (2022). Incidence of Neonatal Developmental Dysplasia of the Hip and Late Detection Rates Based on Screening Strategy: A Systematic Review and Meta-analysis. JAMA Network Open, 5(8).",
-        "Oleas Santillán, G. F. (2026). Scikit-learn, PyCaret, LazyPredict y Streamlit aplicados a la Ortopedia Pediátrica. Documento académico inédito."
+        "Pedregosa, F., et al. (2011). Scikit-learn: Machine Learning in Python. Journal of Machine Learning Research, 12, 2825–2830."
     ]
 
     for i, ref in enumerate(referencias, start=1):
@@ -284,45 +253,43 @@ def mostrar_bibliografia():
         )
 
 
-# ============================================================
-# CARGAR DATASET Y ENTRENAR MODELO
-# ============================================================
-
 try:
     df = cargar_datos()
 except Exception:
-    st.error("No se encontró el archivo dataset_sintetico_ddc.csv.")
+    st.error("No se encontró el archivo dataset_sintetico_ddc_graf_auditado_v2.csv.")
+    st.write("Verifique que el archivo esté cargado junto a app.py.")
     st.stop()
 
 if OBJETIVO not in df.columns:
-    st.error(f"El dataset debe contener la columna objetivo: {OBJETIVO}")
+    st.error("El dataset no contiene la variable objetivo ddc_diagnostico.")
     st.stop()
 
 modelo, X, metricas, matriz = entrenar_modelo(df)
 
 
-# ============================================================
-# BARRA LATERAL
-# ============================================================
-
 try:
-    st.sidebar.image(ICONO, width=130)
+    st.sidebar.image(ICONO, width=150)
 except Exception:
-    st.sidebar.write("🤖")
+    st.sidebar.write("🦴")
 
-st.sidebar.title("Salud Ortopédica Pediátrica Plus+IA, SOPP+IA,  Sofía")
+st.sidebar.title("SOPP+IA Sofía")
 st.sidebar.write("Predictor educativo de DDC")
 
 st.sidebar.markdown("---")
-st.sidebar.markdown(
-    """
-    **Desarrollado por:**  
-    Dr. Geovanny Oleas-Santillán  
+st.sidebar.markdown("""
+**Para padres y cuidadores**  
 
-    Ortopedista Pediatra  
-    Quito, Ecuador
-    """
-)
+Aplicación para concientizar sobre el diagnóstico temprano y el tratamiento oportuno de la Displasia del Desarrollo de Cadera.
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("""
+**Desarrollado por:**  
+Dr. Geovanny F. Oleas-Santillán  
+
+Ortopedista Pediatra  
+Quito, Ecuador
+""")
 
 st.sidebar.markdown("---")
 
@@ -331,17 +298,15 @@ menu = st.sidebar.radio(
     [
         "Inicio",
         "Exploración de datos",
+        "Ecografía Graf",
         "Modelo predictivo",
         "Predicción individual",
+        "Diccionario",
         "Bibliografía",
-        "Interpretación clínica"
+        "Interpretación para padres"
     ]
 )
 
-
-# ============================================================
-# INICIO
-# ============================================================
 
 if menu == "Inicio":
 
@@ -351,7 +316,9 @@ if menu == "Inicio":
         st.markdown(
             """
             <div class="titulo">
-            SOPP+IA Sofía: Predictor educativo de Displasia del Desarrollo de Cadera
+            SOPP+IA Sofía:<br>
+            Sistema Inteligente para Apoyo al Diagnóstico<br>
+            de la Displasia del Desarrollo de Cadera (DDC)
             </div>
             """,
             unsafe_allow_html=True
@@ -360,9 +327,9 @@ if menu == "Inicio":
         st.markdown(
             """
             <p class="subtitulo">
-            Aplicación académica en Python y Streamlit para explorar factores de riesgo,
-            visualizar datos y estimar una probabilidad educativa de Displasia del Desarrollo
-            de Cadera mediante Machine Learning.
+            Aplicación académica para entrenamiento de padres, madres y cuidadores de niños.
+            Su objetivo es concientizar sobre la importancia del diagnóstico temprano y el
+            tratamiento oportuno de la Displasia del Desarrollo de Cadera.
             </p>
             """,
             unsafe_allow_html=True
@@ -371,8 +338,8 @@ if menu == "Inicio":
         st.markdown(
             """
             <div class="alerta">
-            Uso académico y educativo. Este sistema no reemplaza el criterio médico,
-            el examen físico ni los estudios de imagen.
+            Esta aplicación es educativa. No reemplaza el examen físico, la ecografía, la radiografía
+            ni la evaluación del médico especialista ortopedista pediatra.
             </div>
             """,
             unsafe_allow_html=True
@@ -381,9 +348,10 @@ if menu == "Inicio":
         st.markdown(
             """
             <div class="bloque-azul">
-            <b>Proyecto desarrollado por:</b><br>
-            Dr. Geovanny Oleas-Santillán<br>
-            Ortopedista Pediatra · Quito, Ecuador
+            <b>Desarrollado por:</b><br>
+            Dr. Geovanny F. Oleas-Santillán<br>
+            Ortopedista Pediatra · Quito, Ecuador<br>
+            www.drgeovannyoleas.com
             </div>
             """,
             unsafe_allow_html=True
@@ -395,15 +363,13 @@ if menu == "Inicio":
         except Exception:
             st.info("SOPP+IA Sofía")
 
-    st.write("")
-
     c1, c2, c3, c4 = st.columns(4)
 
     with c1:
-        card("Pacientes", df.shape[0])
+        card("Pacientes sintéticos", df.shape[0])
 
     with c2:
-        card("Variables", df.shape[1] - 1)
+        card("Variables", df.shape[1])
 
     with c3:
         card("Casos DDC", int((df[OBJETIVO] == "Si").sum()))
@@ -411,79 +377,54 @@ if menu == "Inicio":
     with c4:
         card("Modelo", "Random Forest")
 
-    st.write("")
+    st.subheader("Distribución del diagnóstico")
 
-    col_grafico, col_lectura = st.columns([1.4, 1])
+    fig, ax = plt.subplots(figsize=(6, 4))
+    df[OBJETIVO].value_counts().plot(kind="bar", ax=ax)
+    ax.set_xlabel("Diagnóstico DDC")
+    ax.set_ylabel("Número de pacientes")
+    ax.set_title("Distribución de la variable objetivo")
+    st.pyplot(fig)
 
-    with col_grafico:
-        st.subheader("Distribución del diagnóstico")
-
-        fig, ax = plt.subplots(figsize=(6, 4))
-        df[OBJETIVO].value_counts().plot(kind="bar", ax=ax)
-        ax.set_xlabel("Diagnóstico DDC")
-        ax.set_ylabel("Número de pacientes")
-        ax.set_title("Distribución de la variable objetivo")
-        st.pyplot(fig)
-
-    with col_lectura:
-        st.subheader("Lectura rápida")
-
-        st.markdown(
-            """
-            <div class="bloque-azul">
-            <b>¿Qué hace Sofía?</b><br>
-            Organiza variables clínicas, entrena un modelo predictivo y entrega una
-            estimación de riesgo que debe ser interpretada por el médico.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.markdown(
-            """
-            <div class="bloque">
-            <b>Uso recomendado:</b><br>
-            educación médica, demostración académica, análisis de datos y apoyo
-            a la investigación en Ortopedia Pediátrica.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-# ============================================================
-# EXPLORACIÓN DE DATOS
-# ============================================================
 
 elif menu == "Exploración de datos":
 
-    st.header("Exploración del dataset")
+    st.header("Exploración del dataset auditado")
 
-    col1, col2 = st.columns([1.2, 1])
+    resumen = pd.DataFrame({
+        "Indicador": [
+            "Pacientes",
+            "Variables",
+            "Datos faltantes",
+            "DDC Sí",
+            "DDC No"
+        ],
+        "Valor": [
+            df.shape[0],
+            df.shape[1],
+            int(df.isnull().sum().sum()),
+            int((df[OBJETIVO] == "Si").sum()),
+            int((df[OBJETIVO] == "No").sum())
+        ]
+    })
 
-    with col1:
-        st.subheader("Primeras filas")
-        st.dataframe(df.head(15), use_container_width=True)
+    st.table(resumen)
 
-    with col2:
-        st.subheader("Resumen general")
+    st.subheader("Primeras filas")
+    st.dataframe(df.head(15), use_container_width=True)
 
-        resumen = pd.DataFrame({
-            "Indicador": [
-                "Número de pacientes",
-                "Número de variables",
-                "Datos faltantes",
-                "Variable objetivo"
-            ],
-            "Valor": [
-                df.shape[0],
-                df.shape[1],
-                int(df.isnull().sum().sum()),
-                OBJETIVO
-            ]
-        })
+    st.subheader("Resultados clínicos simulados")
 
-        st.table(resumen)
+    if "resultado_final_simulado" in df.columns:
+        st.dataframe(
+            df[
+                [
+                    "resultado_final_simulado",
+                    "ddc_diagnostico"
+                ]
+            ].head(20),
+            use_container_width=True
+        )
 
     st.subheader("Visualización por variable")
 
@@ -492,95 +433,119 @@ elif menu == "Exploración de datos":
         [c for c in df.columns if c != "id_paciente"]
     )
 
-    col_grafico, col_texto = st.columns([1.4, 1])
+    fig, ax = plt.subplots(figsize=(7, 4))
 
-    with col_grafico:
-        fig, ax = plt.subplots(figsize=(6, 4))
+    if pd.api.types.is_numeric_dtype(df[variable]):
+        ax.hist(df[variable].dropna())
+        ax.set_title(f"Histograma de {variable}")
+        ax.set_xlabel(variable)
+        ax.set_ylabel("Frecuencia")
+    else:
+        df[variable].astype(str).value_counts().plot(kind="bar", ax=ax)
+        ax.set_title(f"Distribución de {variable}")
+        ax.set_xlabel(variable)
+        ax.set_ylabel("Frecuencia")
 
-        if pd.api.types.is_numeric_dtype(df[variable]):
-            ax.hist(df[variable].dropna())
-            ax.set_xlabel(variable)
-            ax.set_ylabel("Frecuencia")
-            ax.set_title(f"Histograma de {variable}")
-        else:
-            df[variable].astype(str).value_counts().plot(kind="bar", ax=ax)
-            ax.set_xlabel(variable)
-            ax.set_ylabel("Frecuencia")
-            ax.set_title(f"Distribución de {variable}")
-
-        st.pyplot(fig)
-
-    with col_texto:
-        st.markdown(
-            """
-            <div class="bloque-azul">
-            <b>Interpretación:</b><br>
-            Esta sección permite observar cómo se distribuyen las variables del dataset.
-            La exploración de datos es el primer paso antes de entrenar un modelo.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    st.pyplot(fig)
 
 
-# ============================================================
-# MODELO PREDICTIVO
-# ============================================================
+elif menu == "Ecografía Graf":
 
-elif menu == "Modelo predictivo":
-
-    st.header("Modelo predictivo")
+    st.header("Variables ecográficas según método de Graf")
 
     st.markdown(
         """
         <div class="bloque-azul">
-        El modelo utiliza Random Forest Classifier. Las variables categóricas se transforman
-        mediante One-Hot Encoding y las variables numéricas pasan directamente al modelo.
+        El método de Graf clasifica cada cadera por separado. Por eso el dataset contiene
+        grupo_graf_derecho y grupo_graf_izquierdo, sin usar una clasificación global.
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    col1, col2 = st.columns([1, 1])
+    st.info(
+        "Clasificación ecográfica basada en los principios descritos por Reinhard Graf para el diagnóstico temprano de la Displasia del Desarrollo de Cadera."
+    )
+
+    variables_graf = [
+        "angulo_alfa_derecho",
+        "angulo_alfa_izquierdo",
+        "angulo_beta_derecho",
+        "angulo_beta_izquierdo",
+        "cobertura_cabeza_femoral_derecha_pct",
+        "cobertura_cabeza_femoral_izquierda_pct",
+        "grupo_graf_derecho",
+        "grupo_graf_izquierdo"
+    ]
+
+    st.dataframe(df[variables_graf].head(20), use_container_width=True)
+
+    col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Métricas")
+        st.subheader("Grupo Graf derecho")
+        fig, ax = plt.subplots()
+        df["grupo_graf_derecho"].value_counts().plot(kind="bar", ax=ax)
+        ax.set_xlabel("Grupo Graf")
+        ax.set_ylabel("Frecuencia")
+        st.pyplot(fig)
 
+    with col2:
+        st.subheader("Grupo Graf izquierdo")
+        fig, ax = plt.subplots()
+        df["grupo_graf_izquierdo"].value_counts().plot(kind="bar", ax=ax)
+        ax.set_xlabel("Grupo Graf")
+        ax.set_ylabel("Frecuencia")
+        st.pyplot(fig)
+
+
+elif menu == "Modelo predictivo":
+
+    st.header("Modelo predictivo de Machine Learning")
+
+    st.markdown(
+        """
+        <div class="bloque-azul">
+        Se utiliza Random Forest Classifier. Las variables categóricas se transforman con
+        One-Hot Encoding y las variables numéricas pasan directamente al modelo.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
         metricas_df = pd.DataFrame({
             "Métrica": list(metricas.keys()),
             "Valor": [round(v, 3) for v in metricas.values()]
         })
 
+        st.subheader("Métricas")
         st.table(metricas_df)
 
     with col2:
-        st.subheader("Matriz de confusión")
-
         matriz_df = pd.DataFrame(
             matriz,
             index=["Real No", "Real Si"],
             columns=["Predicho No", "Predicho Si"]
         )
 
+        st.subheader("Matriz de confusión")
         st.table(matriz_df)
 
-    st.warning(
-        "Las métricas corresponden a un dataset sintético. No deben interpretarse como validación clínica externa."
-    )
+    st.warning("Estas métricas proceden de un dataset sintético. No equivalen a validación clínica externa.")
 
-
-# ============================================================
-# PREDICCIÓN INDIVIDUAL
-# ============================================================
 
 elif menu == "Predicción individual":
 
-    st.header("Predicción individual con SOPP+IA Sofía")
+    st.header("Predicción individual educativa")
 
     st.markdown(
         """
         <div class="alerta">
-        Ingrese los datos del paciente. La predicción es educativa y requiere interpretación médica profesional.
+        Complete los datos simulados. El resultado sirve para educación y entrenamiento.
+        Siempre se recomienda evaluación por un médico especialista ortopedista pediatra.
         </div>
         """,
         unsafe_allow_html=True
@@ -599,27 +564,15 @@ elif menu == "Predicción individual":
             with contenedor:
 
                 if pd.api.types.is_numeric_dtype(X[columna]):
-
                     entrada[columna] = st.number_input(
-                        label=columna,
+                        columna,
                         value=float(X[columna].mean())
                     )
-
                 else:
-                    opciones = sorted(
-                        X[columna]
-                        .astype(str)
-                        .dropna()
-                        .unique()
-                        .tolist()
-                    )
+                    opciones = sorted(X[columna].astype(str).dropna().unique().tolist())
+                    entrada[columna] = st.selectbox(columna, opciones)
 
-                    entrada[columna] = st.selectbox(
-                        label=columna,
-                        options=opciones
-                    )
-
-        boton = st.form_submit_button("Analizar con SOPP+IA Sofía")
+        boton = st.form_submit_button("Analizar riesgo educativo de DDC")
 
     if boton:
 
@@ -629,7 +582,7 @@ elif menu == "Predicción individual":
         probabilidad = obtener_probabilidad_ddc(modelo, nuevo_paciente)
         categoria, recomendacion = clasificar_riesgo(probabilidad)
 
-        st.subheader("Resultado")
+        st.subheader("Resultado educativo")
 
         r1, r2, r3 = st.columns(3)
 
@@ -642,122 +595,77 @@ elif menu == "Predicción individual":
         with r3:
             card("Categoría", categoria)
 
-        st.write("")
+        st.info(recomendacion)
 
-        col_resultado, col_recomendacion = st.columns([1, 1])
-
-        with col_resultado:
-            if prediccion == "Si":
-                st.warning("El modelo clasifica el caso como compatible con riesgo de DDC.")
-            else:
-                st.success("El modelo clasifica el caso como bajo riesgo de DDC.")
-
-        with col_recomendacion:
-            st.info(recomendacion)
+        st.warning(
+            "Este resultado no confirma ni descarta DDC. La decisión clínica corresponde al ortopedista pediatra."
+        )
 
         with st.expander("Ver datos ingresados"):
             st.dataframe(nuevo_paciente, use_container_width=True)
 
 
-# ============================================================
-# BIBLIOGRAFÍA
-# ============================================================
+elif menu == "Diccionario":
+
+    st.header("Diccionario de variables")
+
+    try:
+        with open(DICCIONARIO, "r", encoding="utf-8") as f:
+            texto_diccionario = f.read()
+
+        st.text(texto_diccionario)
+
+    except Exception:
+        st.error("No se encontró el archivo diccionario_variables_ddc_graf_auditado_v2.txt.")
+
 
 elif menu == "Bibliografía":
 
-    st.header("Bibliografía")
+    st.header("Bibliografía clínica principal")
+    mostrar_bibliografia()
+
+
+elif menu == "Interpretación para padres":
+
+    st.header("Información educativa para padres y cuidadores")
 
     st.markdown(
         """
         <div class="bloque-azul">
-        Referencias clínicas y académicas utilizadas para contextualizar la Displasia del
-        Desarrollo de Cadera y el uso de herramientas de Machine Learning en el proyecto.
+        La Displasia del Desarrollo de Cadera puede mejorar cuando se detecta temprano.
+        El diagnóstico oportuno permite tratamientos menos invasivos y mejores resultados.
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    mostrar_bibliografia()
+    st.success(
+        "El diagnóstico temprano durante los primeros meses de vida permite tratamientos menos invasivos y mejores resultados funcionales."
+    )
 
+    st.markdown("""
+    ### Mensajes clave
 
-# ============================================================
-# INTERPRETACIÓN CLÍNICA
-# ============================================================
+    - La DDC puede presentarse aunque el niño parezca sano.
+    - La ecografía de caderas es importante en los primeros meses de vida.
+    - El método de Graf evalúa cada cadera por separado.
+    - El diagnóstico tardío puede relacionarse con cojera, dolor, limitación funcional y artrosis temprana.
+    - La evaluación debe ser realizada por un médico especialista en Ortopedia Pediátrica.
+    """)
 
-elif menu == "Interpretación clínica":
+    st.warning(
+        "Esta aplicación no reemplaza la consulta médica. Ante dudas, signos clínicos o factores de riesgo, acudir a Ortopedia Pediátrica."
+    )
 
-    st.header("Interpretación clínica educativa")
-
-    col1, col2 = st.columns([2, 1])
-
-    with col1:
-        st.markdown(
-            """
-            <div class="bloque-azul">
-            <b>SOPP+IA Sofía</b> es una herramienta educativa de inteligencia aumentada.
-            Su función es apoyar el análisis de factores de riesgo de Displasia del Desarrollo
-            de Cadera.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.subheader("Lectura sugerida del resultado")
-
-        st.markdown(
-            """
-            <div class="bloque">
-            <b>Riesgo bajo:</b><br>
-            Mantener vigilancia clínica según edad, antecedentes y signos físicos.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.markdown(
-            """
-            <div class="bloque">
-            <b>Riesgo intermedio:</b><br>
-            Correlacionar con examen físico y estudio de imagen.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.markdown(
-            """
-            <div class="bloque">
-            <b>Riesgo alto:</b><br>
-            Recomienda evaluación prioritaria por Ortopedia Pediátrica.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.warning(
-            "Este predictor no reemplaza ecografía, radiografía, examen físico ni criterio clínico."
-        )
-
-    with col2:
-        try:
-            st.image(ICONO, caption="SOPP+IA Sofía", use_container_width=True)
-        except Exception:
-            st.info("SOPP+IA Sofía")
-
-
-# ============================================================
-# PIE DE PÁGINA
-# ============================================================
 
 st.markdown(
     """
     <div class="footer">
         <b>SOPP+IA Sofía</b><br>
-        Inteligencia humana + inteligencia artificial para servir mejor a niños y familias<br><br>
-        <span style="font-size:15px;">
-        Proyecto desarrollado por <b>Dr. Geovanny Oleas-Santillán</b><br>
-        Ortopedista Pediatra · Quito, Ecuador
-        </span>
+        Aplicación educativa para padres y cuidadores sobre diagnóstico temprano y tratamiento oportuno de la DDC.<br><br>
+        Desarrollado por <b>Dr. Geovanny F. Oleas-Santillán</b><br>
+        Ortopedista Pediatra · Quito, Ecuador<br>
+        www.drgeovannyoleas.com
     </div>
     """,
     unsafe_allow_html=True

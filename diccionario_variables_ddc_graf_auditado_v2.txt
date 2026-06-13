@@ -1,0 +1,46 @@
+Diccionario de variables - Dataset sintético DDC con ecografía por método de Graf auditado
+Uso: académico, demostrativo y no clínico. No usar para decisiones médicas reales.
+Registros: 1000 pacientes sintéticos. Variables: 26. Variable objetivo: ddc_diagnostico.
+
+- id_paciente: Identificador sintético del paciente.
+- sexo: Sexo biológico registrado en el dataset sintético: Masculino/Femenino.
+- presentacion_podalica: Antecedente de presentación podálica: Si/No.
+- antecedente_familiar_ddc: Antecedente familiar de DDC: Si/No.
+- primer_hijo: Condición de primer hijo: Si/No.
+- tipo_parto: Tipo de parto registrado: Vaginal/Cesarea.
+- edad_gestacional_sem: Edad gestacional al nacimiento, expresada en semanas.
+- peso_nacer_g: Peso al nacer, expresado en gramos.
+- oligohidramnios: Antecedente de oligohidramnios: Si/No.
+- torticolis_congenita: Presencia de tortícolis congénita asociada: Si/No.
+- asimetria_pliegues: Asimetría de pliegues durante examen clínico: Si/No.
+- abduccion_limitada: Limitación clínica de la abducción de cadera: Si/No.
+- edad_tamizaje_meses: Edad al tamizaje o evaluación inicial, expresada en meses.
+- indice_acetabular_derecho: Índice acetabular radiográfico derecho simulado, en grados.
+- indice_acetabular_izquierdo: Índice acetabular radiográfico izquierdo simulado, en grados.
+- angulo_alfa_derecho: Ángulo alfa ecográfico derecho según método de Graf, en grados.
+- angulo_alfa_izquierdo: Ángulo alfa ecográfico izquierdo según método de Graf, en grados.
+- angulo_beta_derecho: Ángulo beta ecográfico derecho según método de Graf, en grados.
+- angulo_beta_izquierdo: Ángulo beta ecográfico izquierdo según método de Graf, en grados.
+- cobertura_cabeza_femoral_derecha_pct: Cobertura ecográfica de la cabeza femoral derecha, porcentaje sintético.
+- cobertura_cabeza_femoral_izquierda_pct: Cobertura ecográfica de la cabeza femoral izquierda, porcentaje sintético.
+- grupo_graf_derecho: Clasificación ecográfica de la cadera derecha según Graf: I, IIa, IIb, IIc, D, III o IV.
+- grupo_graf_izquierdo: Clasificación ecográfica de la cadera izquierda según Graf: I, IIa, IIb, IIc, D, III o IV.
+- riesgo_teorico_ddc: Puntaje sintético de riesgo teórico de DDC calculado por reglas educativas.
+- resultado_final_simulado: Resultado clínico final simulado, orientado a evolución esperada: normalidad, inmadurez fisiológica, DDC leve/moderada, riesgo de cojera infantil, cirugía o artrosis temprana en juventud/adultez.
+- ddc_diagnostico: Variable objetivo del modelo: Si/No para diagnóstico sintético de DDC.
+
+Reglas ecográficas sintéticas usadas para auditoría:
+- Graf I: alfa >= 60°.
+- Graf IIa: alfa 50°-59°, considerado inmaduro/no displásico en este dataset educativo.
+- Graf IIb: alfa 50°-59°, considerado displásico persistente.
+- Graf IIc/D: alfa 43°-49°, con beta mayor para D.
+- Graf III/IV: alfa < 43°, con menor cobertura femoral y mayor severidad sintética.
+
+Nota: Los rangos se usan para coherencia interna del dataset sintético; no reemplazan evaluación ecográfica certificada.
+
+
+Auditoría v2:
+- Se verificó coherencia interna entre grupo Graf, ángulo alfa, ángulo beta y diagnóstico DDC.
+- No se identificaron inconsistencias estructurales.
+- Se conservaron 1000 registros y 26 variables.
+- Se corrigió la ortografía de resultados finales simulados sin cambiar la lógica clínica.
