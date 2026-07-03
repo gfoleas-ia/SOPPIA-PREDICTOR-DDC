@@ -317,8 +317,8 @@ if menu == "Inicio":
             """
             <div class="titulo">
             SOPP+IA Sofía:<br>
-            Apoyo al Diagnóstico de la Displasia del Desarrollo de Cadera (DDC)<br>
-            Con métricas de un dataset sintético. No equivalen a validación clínica externa
+            Simulador del Diagnóstico de la Displasia del Desarrollo de Cadera (DDC)<br>
+            Con métricas de un dataset sintético. No equivalen a validación clínica externa, no se recomienda aplicarlo en pacientes reales.
             </div>
             """,
             unsafe_allow_html=True
